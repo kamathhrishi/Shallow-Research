@@ -1,5 +1,7 @@
 # Shallow Research Podcast Generator 😅
 
+(Credits to Claude 3.5 Sonnet for this README haha) 
+
 A open source AI Agent that conducts research and generates both research reports and engaging podcast conversations between two virtual hosts (Alex and Sarah). 
 
 While tech giants are working on "deep" research capabilities, we're keeping it light and breezy with:
