@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Podcast Studio</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --primary-light: #EEF2FF;
+            --success-color: #10B981;
+            --error-color: #EF4444;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            padding: 1rem 0;
+            background: linear-gradient(135deg, var(--primary-color), #6366F1) !important;
+        }
+
+        .generation-section {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .result-container {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .status-messages-container {
+            margin-top: 2rem;
+        }
+
+        .progress {
+            height: 8px;
+            background-color: var(--primary-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .thinking-process {
+            margin-bottom: 0.5rem;
+            transition: opacity 0.5s ease-in;
+        }
+
+        .thought-bubble {
+            background: #f8f9fa;
+            border-left: 4px solid #4F46E5;
+            padding: 0.75rem 1rem;
+            margin-left: 1rem;
+            font-size: 0.95rem;
+            color: #4a5568;
+        }
+
+        .thought-bubble i {
+            color: #4F46E5;
+        }
+
+        .research-report {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .research-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .research-section .content {
+            line-height: 1.6;
+        }
+
+        .research-section ul {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .research-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .research-section code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .research-section h3 {
+            margin: 1.5rem 0 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .sources-list {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .podcast-player {
+            background: #4F46E5;
+            color: white;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .connection-status {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .connection-status.connected {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .connection-status.disconnected {
+            background: var(--error-color);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Connection Status -->
+    <div id="connectionStatus" class="connection-status">
+        <i class="fas fa-circle"></i>
+        <span>Connecting...</span>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="fas fa-podcast me-2"></i>
+                AI Podcast Studio
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <!-- Welcome Section -->
+        <div id="welcomeSection" class="text-center">
+            <h1 class="display-4 mb-4" style="background: linear-gradient(135deg, var(--primary-color), #6366F1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Create Your AI Podcast
+            </h1>
+            <p class="lead mb-5">Transform any topic into an engaging podcast episode</p>
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <input type="text" class="form-control form-control-lg mb-3" id="topicInput" 
+                        placeholder="Enter your topic (e.g., 'History of Jazz')">
+                    <button class="btn btn-primary btn-lg w-100 py-3" id="generateButton" disabled>
+                        Generate Podcast
+                        <i class="fas fa-wand-magic-sparkles ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generation Section -->
+        <div id="generationSection" class="generation-section">
+            <!-- Result Section with Audio Player -->
+            <div id="resultSection" style="display: none; margin-bottom: 2rem;">
+                <div class="podcast-player">
+                    <h3 id="podcastTitle" class="mb-3"></h3>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-light me-3" id="playButton">
+                            <i class="fas fa-play me-2"></i>Play
+                        </button>
+                        <div class="flex-grow-1">
+                            <div id="duration" class="text-white">Loading...</div>
+                        </div>
+                        <audio id="audioPlayer" style="display: none;"></audio>
+                    </div>
+                </div>
+            </div>
+
+            <div id="statusMessages"></div>
+            
+            <div class="progress mb-4">
+                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global configuration
+        const CONFIG = {
+            WS_ENDPOINT: 'ws://localhost:8001/ws'
+        };
+        
+        class PodcastGenerator {
+            constructor() {
+                this.clientId = this.generateClientId();
+                this.ws = null;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
+                this.reconnectDelay = 1000;
+                this.isGenerating = false;
+                this.currentTopic = null;
+                
+                this.setupEventListeners();
+            }
+        
+            generateClientId() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0;
+                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+        
+            connect() {
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    return;
+                }
+        
+                try {
+                    this.updateConnectionStatus('connecting');
+                    this.ws = new WebSocket(`${CONFIG.WS_ENDPOINT}/${this.clientId}`);
+                    
+                    this.ws.onopen = () => this.handleConnection();
+                    this.ws.onmessage = (event) => this.handleMessage(JSON.parse(event.data));
+                    this.ws.onclose = () => this.handleDisconnection();
+                    this.ws.onerror = (error) => this.handleError(error);
+                } catch (error) {
+                    console.error('Connection error:', error);
+                    this.handleError(error);
+                }
+            }
+        
+            handleConnection() {
+                console.log('Connected to WebSocket');
+                this.updateConnectionStatus('connected');
+                this.reconnectAttempts = 0;
+                
+                if (this.isGenerating && this.currentTopic) {
+                    this.startGeneration(this.currentTopic);
+                }
+            }
+        
+            handleDisconnection() {
+                console.log('Disconnected from WebSocket');
+                this.updateConnectionStatus('disconnected');
+        
+                if (this.isGenerating && this.reconnectAttempts < this.maxReconnectAttempts) {
+                    setTimeout(() => {
+                        this.reconnectAttempts++;
+                        this.connect();
+                    }, this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1));
+                } else if (this.isGenerating) {
+                    this.showError('Connection lost. Please try again.');
+                    this.isGenerating = false;
+                }
+            }
+        
+            handleError(error) {
+                console.error('WebSocket error:', error);
+                this.showError('Connection failed. Please try again.');
+            }
+        
+            handleMessage(data) {
+                console.log('Received message:', data);
+                
+                if (data.step) {
+                    this.updateProgress(data);
+                    
+                    if (data.step === 'final' && data.data.status === 'completed') {
+                        console.log('Generation completed, setting up audio player');
+                        // Construct full audio URL
+                        data.data.audio_url = `http://localhost:8001${data.data.audio_url}`;
+                        console.log('Audio URL:', data.data.audio_url);
+                        this.showResult(data.data);
+                        this.isGenerating = false;
+                    }
+                    return;
+                }
+                
+                if (data.type === 'generation_started') {
+                    this.resetUI();
+                } else if (data.error) {
+                    this.showError(data.error);
+                }
+            }
+        
+            setupEventListeners() {
+                const generateButton = document.getElementById('generateButton');
+                const topicInput = document.getElementById('topicInput');
+                const playButton = document.getElementById('playButton');
+        
+                topicInput.addEventListener('input', () => {
+                    generateButton.disabled = !topicInput.value.trim();
+                });
+        
+                generateButton.addEventListener('click', () => {
+                    const topic = topicInput.value.trim();
+                    if (topic) {
+                        this.connect();
+                        this.startGeneration(topic);
+                    }
+                });
+        
+                playButton.addEventListener('click', () => this.handlePlayback());
+            }
+        
+            startGeneration(topic) {
+                if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                    this.isGenerating = true;
+                    this.currentTopic = topic;
+                    return;
+                }
+        
+                this.isGenerating = true;
+                this.currentTopic = topic;
+                
+                document.getElementById('welcomeSection').style.display = 'none';
+                document.getElementById('generationSection').style.display = 'block';
+                
+                this.ws.send(JSON.stringify({
+                    type: 'generate',
+                    topic: topic
+                }));
+            }
+        
+            resetUI() {
+                document.querySelector('.progress-bar').style.width = '0%';
+                document.getElementById('statusMessages').innerHTML = '';
+                document.getElementById('resultSection').style.display = 'none';
+            }
+        
+            updateProgress(data) {
+                if (data.data && data.data.progress) {
+                    document.querySelector('.progress-bar').style.width = `${data.data.progress}%`;
+                }
+                
+                this.addStatusMessage(data);
+            }
+        
+            addStatusMessage(data) {
+                const message = document.createElement('div');
+                
+                if (data.step === 'thinking') {
+                    if (data.data.substep === 'research_thought') {
+                        message.className = 'thinking-process';
+                        message.innerHTML = `
+                            <div class="thought-bubble">
+                                <i class="fas fa-brain me-2"></i>
+                                <em>${data.data.message}</em>
+                            </div>
+                        `;
+                        message.style.opacity = '0';
+                        requestAnimationFrame(() => {
+                            message.style.transition = 'opacity 0.5s ease-in';
+                            message.style.opacity = '1';
+                        });
+                    }
+                } 
+                else if (data.step === 'research') {
+                    message.className = 'research-report';
+                    const findings = data.data.findings;
+                    const renderMarkdown = (text) => {
+                        return text
+                            .replace(/[&<>"']/g, char => ({
+                                '&': '&amp;',
+                                '<': '&lt;',
+                                '>': '&gt;',
+                                '"': '&quot;',
+                                "'": '&#39;'
+                            }[char]))
+                            .replace(/^#{6}\s+(.+)$/gm, '<h6>$1</h6>')
+                            .replace(/^#{5}\s+(.+)$/gm, '<h5>$1</h5>')
+                            .replace(/^#{4}\s+(.+)$/gm, '<h4>$1</h4>')
+                            .replace(/^#{3}\s+(.+)$/gm, '<h3>$1</h3>')
+                            .replace(/^#{2}\s+(.+)$/gm, '<h2>$1</h2>')
+                            .replace(/^#{1}\s+(.+)$/gm, '<h1>$1</h1>')
+                            .replace(/^---$/gm, '<hr>')
+                            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                            .replace(/^[\*\-] (.+)$/gm, '<li>$1</li>')
+                            .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$1</ul>')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                            .replace(/`(.*?)`/g, '<code>$1</code>')
+                            .replace(/\n\n/g, '</p><p>')
+                            .replace(/\n/g, '<br>');
+                    };
+        
+                    message.innerHTML = `
+                        ${findings.map(finding => `
+                            <div class="research-section">
+                                <h5>${finding.title}</h5>
+                                <div class="content">${renderMarkdown(finding.content)}</div>
+                            </div>
+                        `).join('')}
+                    `;
+                }
+                
+                const container = document.getElementById('statusMessages');
+                container.appendChild(message);
+                container.scrollTop = container.scrollHeight;
+            }
+        
+            handlePlayback() {
+                const playButton = document.getElementById('playButton');
+                const audioElement = document.getElementById('audioPlayer');
+                
+                if (audioElement.paused) {
+                    console.log('Starting playback');
+                    if (!audioElement.src || audioElement.src === '') {
+                        audioElement.src = `http://localhost:8001/api/audio/${this.clientId}`;
+                        console.log('Set audio source:', audioElement.src);
+                    }
+                    
+                    audioElement.play()
+                        .then(() => {
+                            console.log('Playback started');
+                            playButton.innerHTML = '<i class="fas fa-pause me-2"></i>Pause';
+                        })
+                        .catch(error => {
+                            console.error('Playback error:', error);
+                            this.showError('Error playing audio: ' + error.message);
+                            playButton.innerHTML = '<i class="fas fa-play me-2"></i>Play';
+                        });
+                } else {
+                    console.log('Pausing playback');
+                    audioElement.pause();
+                    playButton.innerHTML = '<i class="fas fa-play me-2"></i>Play';
+                }
+        
+                // Update duration display
+                if (!audioElement.duration) {
+                    audioElement.onloadedmetadata = () => {
+                        const minutes = Math.floor(audioElement.duration / 60);
+                        const seconds = Math.floor(audioElement.duration % 60);
+                        document.getElementById('duration').textContent = 
+                            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        console.log('Audio duration loaded:', document.getElementById('duration').textContent);
+                    };
+                }
+        
+                // Handle audio end
+                audioElement.onended = () => {
+                    console.log('Playback ended');
+                    playButton.innerHTML = '<i class="fas fa-play me-2"></i>Play';
+                };
+        
+                // Handle audio errors
+                audioElement.onerror = (error) => {
+                    console.error('Audio error:', error);
+                    this.showError('Error loading audio file');
+                    playButton.innerHTML = '<i class="fas fa-play me-2"></i>Play';
+                };
+            }
+        
+            showResult(data) {
+                console.log('Showing result with data:', data);
+                const resultSection = document.getElementById('resultSection');
+                resultSection.style.display = 'block';
+                
+                document.getElementById('podcastTitle').textContent = data.title;
+                
+                // Set initial duration from backend
+                if (data.duration) {
+                    document.getElementById('duration').textContent = data.duration;
+                    console.log('Set initial duration:', data.duration);
+                }
+                
+                // Enable play button and set up audio source
+                const playButton = document.getElementById('playButton');
+                playButton.disabled = false;
+                
+                const audioElement = document.getElementById('audioPlayer');
+                console.log('Setting audio source:', data.audio_url);
+                audioElement.src = data.audio_url;
+                audioElement.preload = 'metadata';
+                
+                // Add error handler
+                audioElement.onerror = (e) => {
+                    console.error('Audio loading error:', e);
+                    this.showError('Error loading audio file. Please try again.');
+                    playButton.disabled = false;
+                    playButton.innerHTML = '<i class="fas fa-play me-2"></i>Play';
+                };
+        
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        
+            updateConnectionStatus(status) {
+                const statusElement = document.getElementById('connectionStatus');
+                const iconElement = statusElement.querySelector('i');
+                const textElement = statusElement.querySelector('span');
+        
+                statusElement.className = 'connection-status';
+                
+                if (status === 'connecting' || status === 'disconnected') {
+                    statusElement.classList.add('show');
+                } else {
+                    setTimeout(() => {
+                        statusElement.classList.remove('show');
+                    }, 2000);
+                }
+                
+                switch (status) {
+                    case 'connected':
+                        statusElement.classList.add('connected');
+                        iconElement.className = 'fas fa-circle';
+                        textElement.textContent = 'Connected';
+                        break;
+                    case 'disconnected':
+                        statusElement.classList.add('disconnected');
+                        iconElement.className = 'fas fa-circle';
+                        textElement.textContent = 'Disconnected';
+                        break;
+                    case 'connecting':
+                        statusElement.classList.add('connecting');
+                        iconElement.className = 'fas fa-circle-notch fa-spin';
+                        textElement.textContent = 'Connecting...';
+                        break;
+                }
+            }
+        
+            showError(message) {
+                console.error('Error:', message);
+                const existingError = document.querySelector('.error-toast');
+                if (existingError) {
+                    existingError.remove();
+                }
+        
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-toast alert alert-danger mb-4';
+        
+                errorDiv.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <div class="flex-grow-1">${message}</div>
+                        <button type="button" class="btn-close ms-2" onclick="this.parentElement.parentElement.remove()"></button>
+                    </div>
+                `;
+        
+                const welcomeSection = document.getElementById('welcomeSection');
+                welcomeSection.insertBefore(errorDiv, welcomeSection.firstChild);
+        
+                setTimeout(() => {
+                    if (errorDiv.parentElement) {
+                        errorDiv.style.animation = 'slideOut 0.3s ease-out';
+                        setTimeout(() => errorDiv.remove(), 300);
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Initialize on DOM content loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.podcastGenerator = new PodcastGenerator();
+        });
+        </script>
+</body>
+</html>
