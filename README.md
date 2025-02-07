@@ -10,8 +10,6 @@ While tech giants are working on "deep" research capabilities, we're keeping it 
 - Text-to-speech magic with Kokoro
 - Real-time updates to keep you entertained while we do our "research" 😉
 
-This project Uses Groq () and SERAPI by default. 
-
 
 ## Requirements
 
