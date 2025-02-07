@@ -11,6 +11,24 @@ While tech giants are working on "deep" research capabilities, we're keeping it 
 - Real-time updates to keep you entertained while we do our "research" 😉
 
 
+## Preview
+
+### 1. Put your topic of interest
+  ![Alt Text](images/1.png)
+  <br/>
+  <br/>
+### 2. Get LLM thought process and plan for generating a report
+  ![Alt Text](images/4.png)
+  <br/>
+  <br/>
+### 3. A Research report based on everything learnt by the LLM
+  ![Alt Text](images/3.png)
+  <br/>
+  <br/>
+### 4. A generated podcast that explains the report
+  ![Alt Text](images/2.png)
+
+
 ## Requirements
 
 Create a `requirements.txt` file with the following dependencies:
