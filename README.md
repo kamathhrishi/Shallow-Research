@@ -6,9 +6,11 @@ A open source AI Agent that conducts research and generates both research report
 
 While tech giants are working on "deep" research capabilities, we're keeping it light and breezy with:
 - Quick Google searches via SERP API
-- Conversational AI using Groq LLM
+- Conversational AI using Groq's "llama-3.3-70b-versatile"
 - Text-to-speech magic with Kokoro
 - Real-time updates to keep you entertained while we do our "research" 😉
+
+This project Uses Groq () and SERAPI by default. 
 
 
 ## Requirements
@@ -89,6 +91,3 @@ Open `index.html` in a web browser to access the frontend interface.
 - Internet connection for API access
 - A sense of humor 😄
 
-## Disclaimer
-
-This project demonstrates automated research and content generation capabilities. The system first conducts research using multiple sources, generating a properly formatted academic-style report with numbered citations and a complete bibliography. This research is then intelligently converted into an engaging podcast conversation, maintaining the factual accuracy while making the content accessible and entertaining.
